@@ -4,6 +4,7 @@ App web "Hola Mundo" en Node.js con ciclo DevOps completo:
 
 1. **Docker** → imagen publicada en [Docker Hub](https://hub.docker.com/r/dantes08/hola-mundo-devops)
 2. **GitHub Actions** → en cada push a `main` se construye la imagen, se sube a Docker Hub y se despliega a producción en Render.com
+3. **Producción** → https://hola-mundo-devops-latest-mns6.onrender.com
 
 ## Ejecutar localmente
 
