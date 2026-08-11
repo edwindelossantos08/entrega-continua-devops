@@ -1,0 +1,10 @@
+{
+  "name": "hola-mundo-devops",
+  "version": "1.0.0",
+  "description": "App web Hola Mundo para práctica de ciclo DevOps con Docker",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "license": "MIT"
+}

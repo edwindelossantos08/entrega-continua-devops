@@ -1,0 +1,52 @@
+# Pipeline CI/CD: construye la imagen Docker, la sube a Docker Hub
+# y despliega automáticamente la app en producción (Render.com).
+
+name: CI/CD - Docker Hub + Render
+
+# Se ejecuta en cada push a la rama main
+on:
+  push:
+    branches: [main]
+
+jobs:
+  # ─────────────────────────────────────────────
+  # Job 1: Construir la imagen y subirla a Docker Hub
+  # ─────────────────────────────────────────────
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      # Clona el código del repositorio en el runner
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      # Inicia sesión en Docker Hub usando los secrets del repositorio
+      # DOCKERHUB_TOKEN debe ser un Access Token, no la contraseña
+      - name: Login en Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Construye la imagen desde el Dockerfile y la publica
+      # con dos tags: "latest" y el SHA corto del commit (trazabilidad)
+      - name: Construir y subir imagen
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/hola-mundo-devops:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/hola-mundo-devops:${{ github.sha }}
+
+  # ─────────────────────────────────────────────
+  # Job 2: Desplegar a producción en Render.com
+  # ─────────────────────────────────────────────
+  deploy:
+    # Solo despliega si la imagen se subió correctamente
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      # Llama al Deploy Hook de Render, que descarga la imagen
+      # más reciente de Docker Hub y reinicia el servicio
+      - name: Disparar despliegue en Render
+        run: curl -fsS "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
